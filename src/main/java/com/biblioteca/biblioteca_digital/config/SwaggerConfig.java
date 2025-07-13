@@ -26,7 +26,7 @@ public class SwaggerConfig {
                 )
                 .externalDocs(new ExternalDocumentation()
                         .description("GitHub do Projeto")
-                        .url("https://github.com/seuusuario/biblioteca-api")
+                        .url("https://github.com/ManoelitoHCM/biblioteca-digital")
                 );
     }
 }
