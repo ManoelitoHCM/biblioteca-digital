@@ -1,18 +1,21 @@
 package com.biblioteca.biblioteca_digital.service;
 
+import com.biblioteca.biblioteca_digital.model.dto.LivroRequestDTO;
+import com.biblioteca.biblioteca_digital.model.dto.LivroResponseDTO;
 import com.biblioteca.biblioteca_digital.model.entity.Livro;
 
 import java.util.List;
 
 public interface LivroService {
-    List<Livro> listarTodos();
+    List<LivroResponseDTO> listarTodos();
     Livro buscarPorId(Long id);
-    Livro criar(Livro livro);
-    Livro atualizar(Long id, Livro livro);
+    LivroResponseDTO criar(LivroRequestDTO dto);
+    LivroResponseDTO atualizar(Long id, LivroRequestDTO dto);
     void deletar(Long id);
-    List<Livro> buscarPorTitulo(String titulo);
-    List<Livro> buscarPorCategoria(Long categoriaId);
-    List<Livro> buscarPorAno(Integer ano);
-    List<Livro> buscarPorAutor(Long autorId);
+    List<LivroResponseDTO> buscarPorTitulo(String titulo);
+    List<LivroResponseDTO> buscarPorCategoria(Long categoriaId);
+    List<LivroResponseDTO> buscarPorAno(Integer ano);
+    List<LivroResponseDTO> buscarPorAutor(Long autorId);
 }
+
 

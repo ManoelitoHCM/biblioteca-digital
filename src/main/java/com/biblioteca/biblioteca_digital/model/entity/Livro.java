@@ -1,9 +1,6 @@
 package com.biblioteca.biblioteca_digital.model.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 import java.math.BigDecimal;

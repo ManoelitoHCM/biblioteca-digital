@@ -1,11 +1,8 @@
 package com.biblioteca.biblioteca_digital.controller;
 
-import com.biblioteca.biblioteca_digital.mapper.DtoMapper;
 import com.biblioteca.biblioteca_digital.model.dto.AutorRequestDTO;
 import com.biblioteca.biblioteca_digital.model.dto.AutorResponseDTO;
 import com.biblioteca.biblioteca_digital.model.dto.LivroResponseDTO;
-import com.biblioteca.biblioteca_digital.model.entity.Autor;
-import com.biblioteca.biblioteca_digital.model.entity.Livro;
 import com.biblioteca.biblioteca_digital.service.AutorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Tag(name = "Autores", description = "Operações relacionadas aos autores")
 @RestController
@@ -31,37 +27,26 @@ public class AutorController {
     @Operation(summary = "Listar todos os autores")
     @GetMapping
     public List<AutorResponseDTO> listarTodos() {
-        return autorService.listarTodos()
-                .stream()
-                .map(DtoMapper::toAutorDTO)
-                .collect(Collectors.toList());
+        return autorService.listarTodos();
     }
 
     @Operation(summary = "Buscar autor por ID")
     @GetMapping("/{id}")
     public AutorResponseDTO buscarPorId(@PathVariable Long id) {
-        return DtoMapper.toAutorDTO(autorService.buscarPorId(id));
+        return autorService.buscarPorId(id);
     }
 
     @Operation(summary = "Criar novo autor")
     @PostMapping
     public ResponseEntity<AutorResponseDTO> criar(@RequestBody @Valid AutorRequestDTO dto) {
-        Autor novo = new Autor();
-        novo.setNome(dto.getNome());
-        novo.setEmail(dto.getEmail());
-        novo.setDataNascimento(dto.getDataNascimento());
-        Autor criado = autorService.criar(novo);
-        return ResponseEntity.status(HttpStatus.CREATED).body(DtoMapper.toAutorDTO(criado));
+        AutorResponseDTO criado = autorService.criar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
 
     @Operation(summary = "Atualizar autor existente")
     @PutMapping("/{id}")
     public AutorResponseDTO atualizar(@PathVariable Long id, @RequestBody @Valid AutorRequestDTO dto) {
-        Autor autor = new Autor();
-        autor.setNome(dto.getNome());
-        autor.setEmail(dto.getEmail());
-        autor.setDataNascimento(dto.getDataNascimento());
-        return DtoMapper.toAutorDTO(autorService.atualizar(id, autor));
+        return autorService.atualizar(id, dto);
     }
 
     @Operation(summary = "Deletar autor")
@@ -74,10 +59,6 @@ public class AutorController {
     @Operation(summary = "Listar livros de um autor")
     @GetMapping("/{id}/livros")
     public List<LivroResponseDTO> listarLivrosDoAutor(@PathVariable Long id) {
-        return autorService.listarLivrosDoAutor(id)
-                .stream()
-                .map(DtoMapper::toLivroDTO)
-                .collect(Collectors.toList());
+        return autorService.listarLivrosDoAutor(id);
     }
 }
-

@@ -3,11 +3,6 @@ package com.biblioteca.biblioteca_digital.controller;
 import com.biblioteca.biblioteca_digital.mapper.DtoMapper;
 import com.biblioteca.biblioteca_digital.model.dto.LivroRequestDTO;
 import com.biblioteca.biblioteca_digital.model.dto.LivroResponseDTO;
-import com.biblioteca.biblioteca_digital.model.entity.Autor;
-import com.biblioteca.biblioteca_digital.model.entity.Categoria;
-import com.biblioteca.biblioteca_digital.model.entity.Livro;
-import com.biblioteca.biblioteca_digital.service.AutorService;
-import com.biblioteca.biblioteca_digital.service.CategoriaService;
 import com.biblioteca.biblioteca_digital.service.LivroService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Tag(name = "Livros", description = "Operações relacionadas aos livros")
 @RestController
@@ -25,13 +19,9 @@ import java.util.stream.Collectors;
 public class LivroController {
 
     private final LivroService livroService;
-    private final AutorService autorService;
-    private final CategoriaService categoriaService;
 
-    public LivroController(LivroService livroService, AutorService autorService, CategoriaService categoriaService) {
+    public LivroController(LivroService livroService) {
         this.livroService = livroService;
-        this.autorService = autorService;
-        this.categoriaService = categoriaService;
     }
 
     @Operation(summary = "Listar livros com filtros opcionais")
@@ -41,19 +31,15 @@ public class LivroController {
             @RequestParam(required = false) Integer ano,
             @RequestParam(required = false) Long autor) {
 
-        List<Livro> livros;
-
         if (categoria != null) {
-            livros = livroService.buscarPorCategoria(categoria);
+            return livroService.buscarPorCategoria(categoria);
         } else if (ano != null) {
-            livros = livroService.buscarPorAno(ano);
+            return livroService.buscarPorAno(ano);
         } else if (autor != null) {
-            livros = livroService.buscarPorAutor(autor);
+            return livroService.buscarPorAutor(autor);
         } else {
-            livros = livroService.listarTodos();
+            return livroService.listarTodos();
         }
-
-        return livros.stream().map(DtoMapper::toLivroDTO).collect(Collectors.toList());
     }
 
     @Operation(summary = "Buscar livro por ID")
@@ -65,51 +51,20 @@ public class LivroController {
     @Operation(summary = "Buscar livros por título")
     @GetMapping("/search")
     public List<LivroResponseDTO> buscarPorTitulo(@RequestParam String titulo) {
-        return livroService.buscarPorTitulo(titulo)
-                .stream()
-                .map(DtoMapper::toLivroDTO)
-                .collect(Collectors.toList());
+        return livroService.buscarPorTitulo(titulo);
     }
 
     @Operation(summary = "Criar novo livro")
     @PostMapping
     public ResponseEntity<LivroResponseDTO> criar(@RequestBody @Valid LivroRequestDTO dto) {
-        Autor autor = autorService.buscarPorId(dto.getAutorId());
-        Categoria categoria = categoriaService.listarTodas().stream()
-                .filter(c -> c.getId().equals(dto.getCategoriaId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
-
-        Livro livro = new Livro();
-        livro.setTitulo(dto.getTitulo());
-        livro.setIsbn(dto.getIsbn());
-        livro.setAnoPublicacao(dto.getAnoPublicacao());
-        livro.setPreco(dto.getPreco());
-        livro.setAutor(autor);
-        livro.setCategoria(categoria);
-
-        Livro criado = livroService.criar(livro);
-        return ResponseEntity.status(HttpStatus.CREATED).body(DtoMapper.toLivroDTO(criado));
+        LivroResponseDTO criado = livroService.criar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
 
     @Operation(summary = "Atualizar livro existente")
     @PutMapping("/{id}")
     public LivroResponseDTO atualizar(@PathVariable Long id, @RequestBody @Valid LivroRequestDTO dto) {
-        Autor autor = autorService.buscarPorId(dto.getAutorId());
-        Categoria categoria = categoriaService.listarTodas().stream()
-                .filter(c -> c.getId().equals(dto.getCategoriaId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
-
-        Livro livro = new Livro();
-        livro.setTitulo(dto.getTitulo());
-        livro.setIsbn(dto.getIsbn());
-        livro.setAnoPublicacao(dto.getAnoPublicacao());
-        livro.setPreco(dto.getPreco());
-        livro.setAutor(autor);
-        livro.setCategoria(categoria);
-
-        return DtoMapper.toLivroDTO(livroService.atualizar(id, livro));
+        return livroService.atualizar(id, dto);
     }
 
     @Operation(summary = "Deletar livro")
@@ -119,4 +74,3 @@ public class LivroController {
         return ResponseEntity.noContent().build();
     }
 }
-
