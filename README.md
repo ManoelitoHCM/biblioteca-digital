@@ -14,7 +14,7 @@ Projeto desenvolvido como parte de um case técnico para a vaga de Desenvolvedor
 - Maven
 - Lombok
 - Bean Validation (`@Valid`)
-- (Opcional) JSoup ou WebClient para scraping
+- (To do) JSoup ou WebClient para scraping
 
 ---
 
@@ -38,8 +38,8 @@ com.seu_pacote.biblioteca
 
 1. Clone o projeto:
    ```bash
-   git clone https://github.com/seu-usuario/biblioteca-api.git
-   cd biblioteca-api
+   git clone https://github.com/ManoelitoHCM/biblioteca-digital.git
+   cd biblioteca-digital
    ```
 
 2. Compile e execute:
@@ -78,7 +78,7 @@ com.seu_pacote.biblioteca
 - `POST /api/categorias` — Criar categoria
 - `GET /api/categorias/{id}/livros` — Livros por categoria
 
-### 🔎 Scraping (a implementar)
+### 🔎 Scraping
 - `POST /api/livros/importar` — Importar dados de um livro via URL
 
 ---
@@ -99,7 +99,6 @@ Você pode testar via:
 
 - Postman (collection incluída em `/test`)
 - `curl` ou qualquer cliente HTTP
-- Swagger (se implementado)
 
 ---
 
