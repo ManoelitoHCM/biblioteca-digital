@@ -9,16 +9,21 @@ import com.biblioteca.biblioteca_digital.repository.CategoriaRepository;
 import com.biblioteca.biblioteca_digital.repository.LivroRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class LivroScrapingService {
+
+    private static final Logger logger = LoggerFactory.getLogger(LivroScrapingService.class);
 
     private final LivroRepository livroRepository;
     private final AutorRepository autorRepository;
@@ -32,29 +37,50 @@ public class LivroScrapingService {
 
     public LivroScrapingDTO extrairDadosLivro(String url) {
         try {
-            Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
+            logger.info("Iniciando extração de dados da URL: {}", url);
+
+            Document doc = Jsoup.connect(url)
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+                    .timeout(10000)
+                    .get();
 
             String titulo = doc.select("#productTitle").text();
-            String autor = doc.select(".author a.a-link-normal").first().text();
+            String autor = Optional.ofNullable(doc.select(".author a.a-link-normal").first())
+                    .map(Element::text)
+                    .orElse("Autor Desconhecido");
 
             String preco = doc.select(".a-price .a-offscreen").stream()
-                    .map(el -> el.text())
+                    .map(Element::text)
                     .filter(text -> text.contains("R$"))
                     .findFirst()
                     .orElseGet(() -> doc.select("span.aok-offscreen").stream()
-                            .map(el -> el.text())
+                            .map(Element::text)
                             .filter(text -> text.contains("R$"))
                             .findFirst()
                             .orElse(""));
+
+            String isbn = doc.select("li span:containsOwn(ISBN-10)").parents().select("span").last().text();
+            String categoria = Optional.ofNullable(doc.select("ul.zg_hrsr li span.a-list-item a").first())
+                    .map(Element::text)
+                    .orElse("Outros");
+
+            String anoTexto = Optional.ofNullable(doc.select("li span:containsOwn(Data da publicação)").parents().select("span").last().text())
+                    .orElse("");
+            int ano = extrairAnoPublicacao(anoTexto);
 
             LivroScrapingDTO dto = new LivroScrapingDTO();
             dto.setTitulo(titulo);
             dto.setAutor(autor);
             dto.setPreco(parsePreco(preco));
+            dto.setIsbn(isbn);
+            dto.setCategoria(categoria);
+            dto.setAnoPublicacao(ano);
 
+            logger.info("Extração concluída com sucesso para título: {}", titulo);
             return dto;
 
         } catch (Exception e) {
+            logger.error("Erro ao extrair dados da URL: {}", url, e);
             throw new RuntimeException("Erro ao extrair dados da página: " + e.getMessage(), e);
         }
     }
@@ -62,10 +88,11 @@ public class LivroScrapingService {
     public Livro salvarLivroRaspado(String url) {
         LivroScrapingDTO scrapingDTO = extrairDadosLivro(url);
 
-        // verifica se já existe livro com mesmo título
-        List<Livro> existentes = livroRepository.findByTituloContainingIgnoreCase(scrapingDTO.getTitulo());
+        // verifica se já existe livro com mesmo ISBN
+        Optional<Livro> existentes = livroRepository.findByIsbn(scrapingDTO.getIsbn());
         if (!existentes.isEmpty()) {
-            return existentes.get(0);
+            logger.info("Livro com ISBN {} já existe no sistema", scrapingDTO.getIsbn());
+            return existentes.get();
         }
 
         // buscar ou criar autor
@@ -78,23 +105,24 @@ public class LivroScrapingService {
                     return autorRepository.save(novo);
                 });
 
-        // usar categoria padrão (ID = 1) ou criar genérica
-        Categoria categoria = categoriaRepository.findById(1L)
+        // buscar ou criar categoria
+        Categoria categoria = categoriaRepository.findByNomeIgnoreCase(scrapingDTO.getCategoria())
                 .orElseGet(() -> {
                     Categoria nova = new Categoria();
-                    nova.setNome("Outros");
-                    nova.setDescricao("Categoria padrão");
+                    nova.setNome(scrapingDTO.getCategoria());
+                    nova.setDescricao("Categoria importada automaticamente");
                     return categoriaRepository.save(nova);
                 });
 
         Livro livro = new Livro();
         livro.setTitulo(scrapingDTO.getTitulo());
-        livro.setIsbn("SCRAPED-" + System.currentTimeMillis());
-        livro.setAnoPublicacao(LocalDate.now().getYear());
+        livro.setIsbn(scrapingDTO.getIsbn());
+        livro.setAnoPublicacao(scrapingDTO.getAnoPublicacao());
         livro.setPreco(scrapingDTO.getPreco());
         livro.setAutor(autor);
         livro.setCategoria(categoria);
 
+        logger.info("Livro salvo com sucesso: {}", livro.getTitulo());
         return livroRepository.save(livro);
     }
 
@@ -105,5 +133,18 @@ public class LivroScrapingService {
         } catch (Exception e) {
             return BigDecimal.ZERO;
         }
+    }
+
+    private int extrairAnoPublicacao(String texto) {
+        try {
+            Pattern padrao = Pattern.compile("\\d{4}");
+            Matcher matcher = padrao.matcher(texto);
+            if (matcher.find()) {
+                return Integer.parseInt(matcher.group());
+            }
+        } catch (Exception e) {
+            logger.warn("Não foi possível extrair ano da publicação: {}", texto);
+        }
+        return LocalDate.now().getYear();
     }
 }
