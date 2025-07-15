@@ -31,7 +31,7 @@ com.biblioteca.biblioteca_digital
 │   └── entity        # Entidades JPA
 ├── repository        # Interfaces de acesso ao banco
 ├── mapper            # Conversão entre entidade e DTO
-├── validation        # Validação de ano e ISBN
+├── validation        # Validação de ano
 └── BibliotecaDigitalApplication.java
 ```
 
@@ -40,15 +40,16 @@ com.biblioteca.biblioteca_digital
 ## 🔍 Funcionalidades
 
 - CRUD completo para:
-   - Autores
-   - Categorias
-   - Livros
+    - Autores
+    - Categorias
+    - Livros
 - Busca de livros por título, autor, ano ou categoria
 - Scraping de livros da Amazon:
-   - Extração de título, autor, ISBN, preço, categoria e ano
-   - Validação se o livro já existe pelo ISBN
-   - Criação automática de autor e categoria, se não existirem
-   - Registro de tentativas de importação via log
+    - Extração de título, autor, ISBN, preço, categoria e ano
+    - Validação se o livro já existe pelo ISBN
+    - Criação automática de autor e categoria, se não existirem
+    - Registro de tentativas de importação via log
+    - Headers (User-Agent) definidos para evitar bloqueios
 
 ---
 
@@ -77,9 +78,26 @@ Certifique-se de que a aplicação esteja em execução.
 
 ---
 
-## 🐳 Docker
+## 🧪 Exemplos de Requisições (Postman)
 
-Adicione `docker-compose.yml` para orquestrar a execução local da aplicação, se desejado.
+Coleção completa disponível em: `postman-collection.json`
+
+Inclui exemplos de requisições para:
+
+- Autores: criar, listar, atualizar, deletar, listar livros por autor
+- Categorias: criar, listar, atualizar, deletar, listar livros por categoria
+- Livros: criar, listar, atualizar, deletar
+- Scraping:
+    - `POST /api/scraping/livros`: extrai informações de um livro
+    - `POST /api/scraping/livros/salvar`: extrai e salva no sistema
+
+Exemplo de JSON para scraping:
+
+```json
+{
+  "url": "https://www.amazon.com.br/dp/8535902775"
+}
+```
 
 ---
 
@@ -103,15 +121,20 @@ Adicione `docker-compose.yml` para orquestrar a execução local da aplicação,
 
 ---
 
+## 🐳 Docker
+
+Adicione `docker-compose.yml` para orquestrar a execução local da aplicação, se desejado.
+
+---
+
 ## 📌 Observações
 
 - Projeto usa banco de dados em memória (H2) para fácil execução local
 - Código limpo, modular e com boas práticas de arquitetura REST
+- O scraping funciona exclusivamente com páginas da Amazon Brasil
 
 ---
 
 ## 👨‍💻 Autor
 
 Desenvolvido por Manoelito Holanda Castelo Matos como parte de desafio técnico.
-
----
