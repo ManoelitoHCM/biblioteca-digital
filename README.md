@@ -1,108 +1,117 @@
-# 📚 Biblioteca Digital - API REST (Spring Boot)
+# 📚 Biblioteca Digital - API REST
 
-Projeto desenvolvido como parte de um case técnico para a vaga de Desenvolvedor Backend Júnior. Esta API gerencia autores, categorias e livros, com suporte a importação via scraping de sites externos.
+Projeto desenvolvido como parte de um case técnico para a vaga de Desenvolvedor Backend Júnior. Esta API gerencia autores, categorias e livros, com suporte a importação via scraping de páginas da Amazon.
 
 ---
 
 ## 🚀 Tecnologias Utilizadas
 
-- Java 17+
+- Java 17
 - Spring Boot 3.x
 - Spring Data JPA
 - Spring Web
 - H2 Database (em memória)
-- Maven
 - Lombok
-- Bean Validation (`@Valid`)
-- (To do) JSoup ou WebClient para scraping
+- Bean Validation
+- JSoup (para scraping)
+- Swagger (documentação)
+- JUnit + Mockito (testes)
 
 ---
 
-## 🧱 Estrutura de Pacotes
+## 📦 Estrutura de Pacotes
 
 ```
-com.seu_pacote.biblioteca
-├── controller
-├── dto
-├── model (ou entity)
-├── repository
-├── service
-│   └── impl
-├── validation
-└── scraping (futuro)
+com.biblioteca.biblioteca_digital
+├── controller        # Endpoints REST
+├── service           # Regras de negócio
+│   └── impl          # Implementações das interfaces
+├── model
+│   ├── dto           # Data Transfer Objects
+│   └── entity        # Entidades JPA
+├── repository        # Interfaces de acesso ao banco
+├── mapper            # Conversão entre entidade e DTO
+├── validation        # Validação de ano e ISBN
+└── BibliotecaDigitalApplication.java
 ```
 
 ---
 
-## 🔧 Como Executar
+## 🔍 Funcionalidades
 
-1. Clone o projeto:
+- CRUD completo para:
+   - Autores
+   - Categorias
+   - Livros
+- Busca de livros por título, autor, ano ou categoria
+- Scraping de livros da Amazon:
+   - Extração de título, autor, ISBN, preço, categoria e ano
+   - Validação se o livro já existe pelo ISBN
+   - Criação automática de autor e categoria, se não existirem
+   - Registro de tentativas de importação via log
+
+---
+
+## 🧪 Testes Unitários
+
+Testes básicos implementados para:
+
+- `AutorService`
+- `CategoriaService`
+- `LivroService`
+- `LivroScrapingService`
+
+Com validações de criação, atualização, exceções e listagens.
+
+---
+
+## 📄 Documentação Swagger
+
+Disponível em:
+
+```
+http://localhost:8080/swagger-ui.html
+```
+
+Certifique-se de que a aplicação esteja em execução.
+
+---
+
+## 🐳 Docker
+
+Adicione `docker-compose.yml` para orquestrar a execução local da aplicação, se desejado.
+
+---
+
+## ▶️ Executando o Projeto
+
+1. Clone o repositório:
    ```bash
    git clone https://github.com/ManoelitoHCM/biblioteca-digital.git
    cd biblioteca-digital
    ```
 
-2. Compile e execute:
+2. Execute a aplicação:
    ```bash
    ./mvnw spring-boot:run
    ```
 
-3. Acesse o console H2 (opcional):
+3. Acesse o Swagger:
    ```
-   http://localhost:8080/h2-console
-   JDBC URL: jdbc:h2:mem:testdb
+   http://localhost:8080/swagger-ui.html
    ```
-
----
-
-## 🔗 Endpoints Disponíveis
-
-### 📘 Livros
-- `GET /api/livros` — Listar todos, com filtros: `?categoria=&autor=&ano=`
-- `GET /api/livros/{id}` — Buscar por ID
-- `GET /api/livros/search?titulo=...` — Buscar por título
-- `POST /api/livros` — Criar novo livro
-- `PUT /api/livros/{id}` — Atualizar livro
-- `DELETE /api/livros/{id}` — Deletar livro
-
-### 👤 Autores
-- `GET /api/autores` — Listar todos
-- `GET /api/autores/{id}` — Buscar por ID
-- `POST /api/autores` — Criar autor
-- `PUT /api/autores/{id}` — Atualizar autor
-- `DELETE /api/autores/{id}` — Deletar autor
-- `GET /api/autores/{id}/livros` — Livros de um autor
-
-### 🏷 Categorias
-- `GET /api/categorias` — Listar todas
-- `POST /api/categorias` — Criar categoria
-- `GET /api/categorias/{id}/livros` — Livros por categoria
-
-### 🔎 Scraping
-- `POST /api/livros/importar` — Importar dados de um livro via URL
-
----
-
-## ✅ Validações
-
-- Título do livro: obrigatório
-- ISBN: deve conter 10 ou 13 dígitos
-- Preço: positivo
-- Ano de publicação: não pode ser futuro
-- Email do autor: formato válido
-
----
-
-## 🧪 Testes
-
-Você pode testar via:
-
-- Postman (collection incluída em `/test`)
-- `curl` ou qualquer cliente HTTP
 
 ---
 
 ## 📌 Observações
 
-- Banco H2 em memória: os dados são perdidos ao reiniciar
-- O scraping será implementado com JSoup, respeitando os headers e tratando exceções
+- Projeto usa banco de dados em memória (H2) para fácil execução local
+- Código limpo, modular e com boas práticas de arquitetura REST
+
+---
+
+## 👨‍💻 Autor
+
+Desenvolvido por Manoelito Holanda Castelo Matos como parte de desafio técnico.
+
+---
