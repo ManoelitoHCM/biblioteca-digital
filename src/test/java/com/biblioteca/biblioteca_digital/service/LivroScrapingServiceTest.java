@@ -7,12 +7,12 @@ import com.biblioteca.biblioteca_digital.model.entity.Livro;
 import com.biblioteca.biblioteca_digital.repository.AutorRepository;
 import com.biblioteca.biblioteca_digital.repository.CategoriaRepository;
 import com.biblioteca.biblioteca_digital.repository.LivroRepository;
+import com.biblioteca.biblioteca_digital.service.impl.LivroScrapingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +24,7 @@ class LivroScrapingServiceTest {
     @Mock private AutorRepository autorRepository;
     @Mock private CategoriaRepository categoriaRepository;
 
-    @InjectMocks private LivroScrapingService scrapingService;
+    @InjectMocks private LivroScrapingServiceImpl scrapingService;
 
     @BeforeEach
     void setUp() {
@@ -43,7 +43,7 @@ class LivroScrapingServiceTest {
         dto.setAnoPublicacao(2024);
 
         // Spy no service para simular extração
-        LivroScrapingService spyService = Mockito.spy(scrapingService);
+        LivroScrapingServiceImpl spyService = Mockito.spy(scrapingService);
         doReturn(dto).when(spyService).extrairDadosLivro(anyString());
 
         when(livroRepository.findByIsbn("1234567890")).thenReturn(Optional.empty());
