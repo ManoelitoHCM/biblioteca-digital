@@ -4,7 +4,7 @@ import com.biblioteca.biblioteca_digital.mapper.DtoMapper;
 import com.biblioteca.biblioteca_digital.model.dto.LivroResponseDTO;
 import com.biblioteca.biblioteca_digital.model.dto.LivroScrapingDTO;
 import com.biblioteca.biblioteca_digital.model.entity.Livro;
-import com.biblioteca.biblioteca_digital.service.LivroScrapingService;
+import com.biblioteca.biblioteca_digital.service.impl.LivroScrapingServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/scraping")
 public class ScrapingController {
 
-    private final LivroScrapingService scrapingService;
+    private final LivroScrapingServiceImpl scrapingService;
 
-    public ScrapingController(LivroScrapingService scrapingService) {
+    public ScrapingController(LivroScrapingServiceImpl scrapingService) {
         this.scrapingService = scrapingService;
     }
 
