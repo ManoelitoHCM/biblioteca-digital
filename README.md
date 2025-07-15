@@ -1,6 +1,6 @@
 # 📚 Biblioteca Digital - API REST
 
-Projeto desenvolvido como parte de um case técnico para a vaga de Desenvolvedor Backend Júnior. Esta API gerencia autores, categorias e livros, com suporte a importação via scraping de páginas da Amazon.
+Projeto desenvolvido como parte de um case técnico para a vaga de Desenvolvedor Backend Júnior. Esta API gerencia autores, categorias e livros, com suporte a importação via scraping de páginas da Amazon Brasil.
 
 ---
 
@@ -16,6 +16,7 @@ Projeto desenvolvido como parte de um case técnico para a vaga de Desenvolvedor
 - JSoup (para scraping)
 - Swagger (documentação)
 - JUnit + Mockito (testes)
+- Docker + Docker Compose
 
 ---
 
@@ -31,7 +32,7 @@ com.biblioteca.biblioteca_digital
 │   └── entity        # Entidades JPA
 ├── repository        # Interfaces de acesso ao banco
 ├── mapper            # Conversão entre entidade e DTO
-├── validation        # Validação de ano
+├── validation        # Validações personalizadas
 └── BibliotecaDigitalApplication.java
 ```
 
@@ -42,27 +43,24 @@ com.biblioteca.biblioteca_digital
 - CRUD completo para:
     - Autores
     - Categorias
-    - Livros
-- Busca de livros por título, autor, ano ou categoria
+      ️- Livros
+- Filtros por título, autor, ano ou categoria
 - Scraping de livros da Amazon:
-    - Extração de título, autor, ISBN, preço, categoria e ano
-    - Validação se o livro já existe pelo ISBN
-    - Criação automática de autor e categoria, se não existirem
-    - Registro de tentativas de importação via log
-    - Headers (User-Agent) definidos para evitar bloqueios
+    - Extração de título, ISBN, preço e ano de publicação
+    - Verificação se o livro já existe pelo ISBN
+    - Criação automática de autor e categoria, se necessário
+    - Headers personalizados e tratamento de erros
+    - Registro de tentativas via log
 
 ---
 
 ## 🧪 Testes Unitários
 
-Testes básicos implementados para:
-
-- `AutorService`
-- `CategoriaService`
-- `LivroService`
-- `LivroScrapingService`
-
-Com validações de criação, atualização, exceções e listagens.
+- Cobertura básica com JUnit + Mockito para os principais serviços:
+    - `AutorService`
+    - `CategoriaService`
+    - `LivroService`
+    - `LivroScrapingService`
 
 ---
 
@@ -80,22 +78,21 @@ Certifique-se de que a aplicação esteja em execução.
 
 ## 🧪 Exemplos de Requisições (Postman)
 
-Coleção completa disponível em: `postman-collection.json`
+Coleção incluída: `postman-collection.json`
 
-Inclui exemplos de requisições para:
+Inclui exemplos de:
 
-- Autores: criar, listar, atualizar, deletar, listar livros por autor
-- Categorias: criar, listar, atualizar, deletar, listar livros por categoria
-- Livros: criar, listar, atualizar, deletar
-- Scraping:
-    - `POST /api/scraping/livros`: extrai informações de um livro
-    - `POST /api/scraping/livros/salvar`: extrai e salva no sistema
+- CRUD de autores, categorias e livros
+- Listagem de livros por autor/categoria
+- Scraping de livro por URL da Amazon
 
-Exemplo de JSON para scraping:
+Exemplo de JSON:
 
 ```json
 {
-  "url": "https://www.amazon.com.br/dp/8535902775"
+  "url": "https://www.amazon.com.br/dp/8535902775",
+  "autorId": 1,
+  "categoriaId": 2
 }
 ```
 
@@ -103,38 +100,45 @@ Exemplo de JSON para scraping:
 
 ## ▶️ Executando o Projeto
 
-1. Clone o repositório:
+### ✅ Via Docker (Recomendado)
+
+1. Compile o projeto localmente:
    ```bash
-   git clone https://github.com/ManoelitoHCM/biblioteca-digital.git
-   cd biblioteca-digital
+   ./mvnw clean package -DskipTests
    ```
 
-2. Execute a aplicação:
+2. Suba o container com Docker Compose:
    ```bash
-   ./mvnw spring-boot:run
+   docker-compose up --build
    ```
 
-3. Acesse o Swagger:
-   ```
-   http://localhost:8080/swagger-ui.html
-   ```
+3. Acesse:
+    - API: [http://localhost:8080/api/livros](http://localhost:8080/api/livros)
+    - Swagger: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+    - H2 Console: [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
 
 ---
 
-## 🐳 Docker
+### 💻 Via Maven local (sem Docker)
 
-Adicione `docker-compose.yml` para orquestrar a execução local da aplicação, se desejado.
+```bash
+./mvnw spring-boot:run
+```
 
 ---
 
 ## 📌 Observações
 
-- Projeto usa banco de dados em memória (H2) para fácil execução local
-- Código limpo, modular e com boas práticas de arquitetura REST
-- O scraping funciona exclusivamente com páginas da Amazon Brasil
+- O projeto utiliza banco em memória (H2), reiniciado a cada execução
+- Scraping compatível com Amazon Brasil (ex: `https://www.amazon.com.br/dp/8535902775`)
+- Código modular, validado com boas práticas de arquitetura REST
+- Docker simplifica a execução sem dependências locais
 
 ---
 
 ## 👨‍💻 Autor
 
-Desenvolvido por Manoelito Holanda Castelo Matos como parte de desafio técnico.
+Desenvolvido por **Manoelito Holanda Castelo Matos**  
+Desafio técnico para vaga de Desenvolvedor Backend Júnior
+
+---
